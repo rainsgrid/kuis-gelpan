@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulasi UTS GELPAN 2026</title>
+    <style>
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #f8f9fa; margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; color: #333; }
+        .container { background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); width: 100%; max-width: 800px; padding: 40px; box-sizing: border-box; }
+        .header-title { text-align: center; color: #0d6efd; font-size: 28px; font-weight: bold; margin-bottom: 10px; }
+        .header-subtitle { text-align: center; color: #6c757d; font-size: 14px; margin-bottom: 30px; }
+        .grid-menu { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
+        .btn-outline { background-color: transparent; border: 1px solid #0d6efd; color: #0d6efd; padding: 15px; border-radius: 6px; cursor: pointer; font-size: 12px; text-align: left; font-weight: 500; transition: 0.2s; height: 100%; display: flex; align-items: center; }
+        .btn-outline:hover { background-color: #f0f7ff; }
+        .btn-solid { background-color: #0d6efd; color: white; border: none; padding: 15px; border-radius: 6px; cursor: pointer; font-size: 15px; font-weight: bold; width: 100%; text-align: center; transition: 0.2s; }
+        .btn-solid:hover { background-color: #0b5ed7; }
+        .btn-prev { background-color: #6c757d; color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        .btn-green { background-color: #198754 !important; width: auto !important; padding: 12px 24px; }
+        .quiz-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 10px; }
+        .category-title { color: #0d6efd; font-size: 18px; font-weight: bold; margin: 0; max-width: 70%; }
+        .question-counter { color: #6c757d; font-size: 14px; font-weight: 500; }
+        .progress-bar-container { width: 100%; background-color: #e9ecef; height: 6px; border-radius: 3px; margin-bottom: 25px; overflow: hidden; }
+        .progress-bar { height: 100%; background-color: #0d6efd; width: 0%; transition: width 0.3s ease; }
+        .question-box { background-color: #f0f7ff; border: 1px solid #cce3fd; border-radius: 8px; padding: 25px; font-size: 17px; margin-bottom: 20px; text-align: left; font-weight: 500; line-height: 1.6;}
+        textarea.essay-input { width: 100%; height: 150px; padding: 15px; border: 1px solid #ced4da; border-radius: 6px; font-family: inherit; font-size: 15px; box-sizing: border-box; resize: vertical; margin-bottom: 20px; }
+        .options-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+        .option-item { display: flex; align-items: flex-start; padding: 12px 15px; border: 1px solid #ced4da; border-radius: 6px; cursor: pointer; transition: 0.2s; line-height: 1.4; }
+        .option-item:hover { background-color: #f8f9fa; }
+        .option-item input { margin-right: 15px; margin-top: 3px; transform: scale(1.2); flex-shrink: 0; pointer-events: none; }
+        .option-item.selected { border-color: #0d6efd; background-color: #f0f7ff; font-weight: 600; }
+        .quiz-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 20px; gap: 10px; }
+        .review-card { border: 1px solid #cce3fd; border-radius: 8px; padding: 15px; margin-bottom: 15px; background-color: #f8fbfd; text-align: left;}
+        .wrong-pg { border-color: #f8d7da; background-color: #fff5f5; }
+        .ans-user { padding: 10px; border-radius: 4px; font-size: 14px; margin-top: 5px; background: white; border: 1px solid #eee; }
+        .ans-ref { background-color: #e8f4fd; padding: 10px; border-radius: 4px; font-size: 14px; color: #084298; margin-top: 5px; }
+        .review-badge { background-color: #e9ecef; color: #495057; font-size: 11px; padding: 3px 8px; border-radius: 4px; float: right; }
+    </style>
+</head>
+<body>
+
+<div class="container" id="home-screen">
+    <div class="header-title">SIMULASI UTS GELPAN 2026</div>
+    <div class="header-subtitle">OS3202 Long Wave and Tidal Dynamics</div>
+    <div class="grid-menu" id="menu-container"></div>
+    <button class="btn-solid" style="width: 100%; margin-top: 10px;" id="btn-all-topics" onclick="startQuiz('Semua Topik')">Mulai Semua Topik</button>
+</div>
+
+<div class="container" id="quiz-screen" style="display: none;">
+    <div class="quiz-header">
+        <h2 class="category-title" id="current-category-text">Kategori</h2>
+        <div class="question-counter" id="question-counter">Soal 1 / 10</div>
+    </div>
+    <div class="progress-bar-container"><div class="progress-bar" id="progress-bar"></div></div>
+    <div class="question-box" id="question-text">...</div>
+    <div id="answer-container"></div>
+    <div class="quiz-footer">
+        <button class="btn-prev" id="btn-prev" onclick="prevQuestion()">Sebelumnya</button>
+        <button class="btn-solid btn-green" id="btn-lihat-hasil" onclick="showResults()">Lihat Hasil</button>
+        <button class="btn-solid" id="btn-next" style="width: auto; padding: 12px 24px;" onclick="nextQuestion()">Selanjutnya</button>
+    </div>
+</div>
+
+<div class="container" id="result-screen" style="display: none;">
+    <div class="header-title" style="font-size: 24px;">Hasil Simulasi</div>
+    <div class="score-card" style="border: 1px solid #e9ecef; border-radius: 8px; padding: 20px; margin-bottom: 30px;">
+        <div style="display:flex; justify-content: space-between; margin-bottom: 10px;"><span>Topik:</span><span id="score-category-name">...</span></div>
+        <div style="display:flex; justify-content: space-between; font-weight: bold; color: #198754; font-size: 18px;"><span>Total Skor PG & T/F:</span><span id="score-text-total">0/0</span></div>
+    </div>
+    <div id="review-container"></div>
+    <button class="btn-solid" onclick="location.reload()" style="width: 100%; margin-top: 20px;">Kembali ke Menu Utama</button>
+</div>
+
+<script>
+const databaseSoal = [
+    // 1. PENDAHULUAN
+    { kategori: "Pendahuluan", tipe: "pg", pertanyaan: "Gelombang yang memiliki periode antara 0,1 - 1 detik dan gaya pemulih utamanya adalah tegangan permukaan disebut...", pilihan: ["A. Swell", "B. Gelombang Kapiler", "C. Ultra-gravity waves", "D. Infra-gravity waves"], kunci_jawaban: "B. Gelombang Kapiler" },
+    { kategori: "Pendahuluan", tipe: "pg", pertanyaan: "Berdasarkan klasifikasi Munk (1951), gelombang 'Ordinary Gravity Waves' memiliki rentang periode...", pilihan: ["A. 0,1 - 1 detik", "B. 1 - 30 detik", "C. 30 detik - 5 menit", "D. 12 - 24 jam"], kunci_jawaban: "B. 1 - 30 detik" },
+    { kategori: "Pendahuluan", tipe: "pg", pertanyaan: "Gelombang tsunami dan seiches masuk dalam kategori periode...", pilihan: ["A. 1 - 30 detik", "B. 30 detik - 5 menit", "C. 5 menit - 12 jam", "D. > 24 jam"], kunci_jawaban: "C. 5 menit - 12 jam" },
+    { kategori: "Pendahuluan", tipe: "pg", pertanyaan: "Syarat asimtotik untuk gelombang perairan dalam (Deep Water Wave) adalah...", pilihan: ["A. h/L < 1/20", "B. h/L > 1/2", "C. 1/20 < h/L < 1/2", "D. h/L = 0.1"], kunci_jawaban: "B. h/L > 1/2" },
+    { kategori: "Pendahuluan", tipe: "pg", pertanyaan: "Apa yang dimaksud dengan gelombang 'Non-Dispersif' pada gelombang panjang?", pilihan: ["A. Kecepatan fase tergantung pada panjang gelombang", "B. Kecepatan fase hanya fungsi dari kedalaman (√gh)", "C. Gelombang tidak bisa merambat di pesisir", "D. Amplitudo gelombang selalu konstan"], kunci_jawaban: "B. Kecepatan fase hanya fungsi dari kedalaman (√gh)" },
+    { kategori: "Pendahuluan", tipe: "pg", pertanyaan: "Skala osilasi gelombang Rossby di lautan (Oceanic Rossby Waves) adalah sekitar...", pilihan: ["A. 1 - 10 km", "B. 10 - 50 km", "C. Ratusan km", "D. 5.000 - 20.000 km"], kunci_jawaban: "C. Ratusan km" },
+    { kategori: "Pendahuluan", tipe: "pg", pertanyaan: "Pada lintasan partikel air gelombang panjang, sumbu panjang (A) dirumuskan sebagai...", pilihan: ["A. A = a / (kh)", "B. A = a * (z/h)", "C. A = a * cosh(kh)", "D. A = a * sinh(kh)"], kunci_jawaban: "A. A = a / (kh)" },
+    { kategori: "Pendahuluan", tipe: "pg", pertanyaan: "Mengapa lintasan partikel air di dasar (z = -h) berbentuk garis lurus horizontal?", pilihan: ["A. Karena sumbu A bernilai nol", "B. Karena sumbu B bernilai nol", "C. Karena tekanan hidrostatik maksimal", "D. Karena kecepatan fase maksimum"], kunci_jawaban: "B. Karena sumbu B bernilai nol" },
+    { kategori: "Pendahuluan", tipe: "pg", pertanyaan: "Bentuk lintasan partikel air pada gelombang perairan dangkal adalah...", pilihan: ["A. Lingkaran", "B. Parabola", "C. Elips", "D. Hiperbola"], kunci_jawaban: "C. Elips" },
+    { kategori: "Pendahuluan", tipe: "pg", pertanyaan: "Pada sumbu pendek (B) lintasan partikel, nilai B akan bernilai maksimum pada posisi...", pilihan: ["A. Dasar (z = -h)", "B. Tengah kolom air", "C. Permukaan (z = 0)", "D. Selalu konstan"], kunci_jawaban: "C. Permukaan (z = 0)" },
+    { kategori: "Pendahuluan", tipe: "pg", pertanyaan: "Gelombang yang dibentuk oleh osilasi horizontal akibat variasi 'potential vorticity' disebut...", pilihan: ["A. Gravity Wave", "B. Planetary Wave", "C. Capillary Wave", "D. Acoustic Wave"], kunci_jawaban: "A. Planetary Wave" },
+    { kategori: "Pendahuluan", tipe: "pg", pertanyaan: "Berapakah nilai perbandingan h/L untuk gelombang perairan menengah?", pilihan: ["A. < 1/20", "B. > 1/2", "C. 0.05 < h/L < 0.5", "D. h/L = 1"], kunci_jawaban: "C. 0.05 < h/L < 0.5" },
+    { kategori: "Pendahuluan", tipe: "true_false", pertanyaan: "Sumbu panjang (A) pada lintasan partikel air gelombang panjang nilainya tergantung pada kedalaman (z).", kunci_jawaban: "Salah", penjelasan: "Sumbu A bersifat uniform/konstan terhadap kedalaman z." },
+    { kategori: "Pendahuluan", tipe: "esai", pertanyaan: "Sebutkan 3 kategori pembagian gelombang berdasarkan kedalaman relatif (h/L) dan berikan batas matematisnya!", kunci_jawaban: "1. Perairan Dalam (h/L > 1/2), 2. Perairan Menengah (1/20 < h/L < 1/2), 3. Perairan Dangkal/Gel. Panjang (h/L < 1/20)." },
+    { kategori: "Pendahuluan", tipe: "esai", pertanyaan: "Jelaskan perbedaan sumbu panjang (A) dan sumbu pendek (B) pada lintasan partikel air di perairan dangkal serta bagaimana pengaruh kedalaman (z) terhadap keduanya!", kunci_jawaban: "Sumbu A adalah amplitudo horizontal yang bersifat seragam (uniform) di seluruh kedalaman. Sumbu B adalah amplitudo vertikal yang bersifat linear, bernilai nol di dasar (z=-h) dan maksimum di permukaan (z=0)." },
+    { kategori: "Pendahuluan", tipe: "esai", pertanyaan: "Gambarkan atau jelaskan klasifikasi gelombang berdasarkan periodenya menurut Munk (1951), minimal sebutkan 4 jenis gelombang beserta gaya pembangkitnya!", kunci_jawaban: "1. Gelombang Kapiler (Angin, <0,1 detik), 2. Gravity Waves (Angin, 1-30 detik), 3. Tsunami/Seiches (Gempa/Tekanan, 5 mnt-12 jam), 4. Pasut (Bulan/Matahari, 12-24 jam)." },
+    { kategori: "Pendahuluan", tipe: "true_false", pertanyaan: "Gelombang pasang surut (pasut) termasuk dalam kategori gelombang panjang.", kunci_jawaban: "Benar" },
+    { kategori: "Pendahuluan", tipe: "true_false", pertanyaan: "Gaya pemulih utama untuk gelombang tsunami adalah gravitasi.", kunci_jawaban: "Benar" },
+
+    // 2. ANGIN & ARUS
+    { kategori: "Angin & Arus", tipe: "pg", pertanyaan: "Zona pertemuan angin pasat timur laut dan tenggara disebut...", pilihan: ["A. Doldrums/ITCZ", "B. Horse Latitudes", "C. Westerlies", "D. Polar High"], kunci_jawaban: "A. Doldrums/ITCZ" },
+    { kategori: "Angin & Arus", tipe: "pg", pertanyaan: "Pada bulan Januari, ITCZ cenderung bergeser ke arah...", pilihan: ["A. Utara", "B. Selatan", "C. Barat", "D. Timur"], kunci_jawaban: "B. Selatan" },
+    { kategori: "Angin & Arus", tipe: "pg", pertanyaan: "Sistem angin yang berubah arah secara musiman akibat perbedaan panas daratan dan laut disebut...", pilihan: ["A. Pasat", "B. Monsun", "C. Geostropik", "D. Ekman"], kunci_jawaban: "B. Monsun" },
+    { kategori: "Angin & Arus", tipe: "pg", pertanyaan: "Arus permukaan ekuator yang bergerak ke arah BARAT adalah...", pilihan: ["A. ECC", "B. EUC", "C. NEC dan SEC", "D. Cromwell Current"], kunci_jawaban: "C. NEC dan SEC" },
+    { kategori: "Angin & Arus", tipe: "pg", pertanyaan: "Equatorial Under Current (EUC) atau Arus Cromwell mengalir di kedalaman...", pilihan: ["A. 0 - 50 m", "B. 100 - 300 m", "C. 1000 - 2000 m", "D. Dasar laut"], kunci_jawaban: "B. 100 - 300 m" },
+    { kategori: "Angin & Arus", tipe: "pg", pertanyaan: "Arus EUC bergerak ke arah...", pilihan: ["A. Barat", "B. Timur", "C. Utara", "D. Selatan"], kunci_jawaban: "B. Timur" },
+    { kategori: "Angin & Arus", tipe: "pg", pertanyaan: "Keseimbangan antara gaya gradien tekanan horizontal dan gaya Coriolis menghasilkan...", pilihan: ["A. Arus Ekman", "B. Arus Geostropik", "C. Arus Thermohalin", "D. Upwelling"], kunci_jawaban: "B. Arus Geostropik" },
+    { kategori: "Angin & Arus", tipe: "pg", pertanyaan: "Fenomena penguatan arus di sisi barat samudera disebut...", pilihan: ["A. Ekman Transport", "B. Western Intensification", "C. Upwelling", "D. El Nino"], kunci_jawaban: "B. Western Intensification" },
+    { kategori: "Angin & Arus", tipe: "pg", pertanyaan: "Contoh Western Boundary Current (WBC) di Samudera Pasifik adalah...", pilihan: ["A. California Current", "B. Peru Current", "C. Kuroshio", "D. Benguela Current"], kunci_jawaban: "C. Kuroshio" },
+    { kategori: "Angin & Arus", tipe: "pg", pertanyaan: "Western Boundary Current memiliki karakteristik...", pilihan: ["A. Lebar dan Lambat", "B. Sempit, Dalam, dan Cepat", "C. Dangkal dan Dingin", "D. Kecepatan < 0.25 m/s"], kunci_jawaban: "B. Sempit, Dalam, dan Cepat" },
+    { kategori: "Angin & Arus", tipe: "pg", pertanyaan: "Vortisitas planeter (f) bernilai nol di...", pilihan: ["A. Kutub Utara", "B. Lintang 30", "C. Ekuator", "D. Kutub Selatan"], kunci_jawaban: "C. Ekuator" },
+    { kategori: "Angin & Arus", tipe: "pg", pertanyaan: "Berapakah kecepatan tipikal Western Boundary Current?", pilihan: ["A. 0.1 m/s", "B. 0.25 m/s", "C. 2 - 3 m/s", "D. 10 m/s"], kunci_jawaban: "C. 2 - 3 m/s" },
+    { kategori: "Angin & Arus", tipe: "pg", pertanyaan: "Vortisitas relatif (ζ) yang berputar searah jarum jam (clockwise) secara konvensi bernilai...", pilihan: ["A. Positif", "B. Negatif", "C. Nol", "D. Tak terhingga"], kunci_jawaban: "B. Negatif" },
+    { kategori: "Angin & Arus", tipe: "pg", pertanyaan: "Vortisitas absolut didefinisikan sebagai...", pilihan: ["A. f - ζ", "B. f + ζ", "C. f / ζ", "D. ζ / f"], kunci_jawaban: "B. f + ζ" },
+    { kategori: "Angin & Arus", tipe: "pg", pertanyaan: "Jika parsel air bergerak ke arah UTARA di Belahan Bumi Utara, maka f akan...", pilihan: ["A. Berkurang", "B. Bertambah", "C. Tetap", "D. Menjadi Nol"], kunci_jawaban: "B. Bertambah" },
+    { kategori: "Angin & Arus", tipe: "pg", pertanyaan: "Untuk menjaga kekekalan vortisitas absolut, jika f bertambah, maka ζ harus...", pilihan: ["A. Bertambah", "B. Berkurang", "C. Tetap", "D. Menjadi positif"], kunci_jawaban: "B. Berkurang" },
+    { kategori: "Angin & Arus", tipe: "pg", pertanyaan: "Gaya yang menyebabkan akumulasi massa air di tengah gyre subtropis adalah...", pilihan: ["A. Gaya Gravitasi", "B. Transport Ekman", "C. Gaya Pasut", "D. Gaya Magnetik"], kunci_jawaban: "B. Transport Ekman" },
+    { kategori: "Angin & Arus", tipe: "esai", pertanyaan: "Jelaskan mekanisme terjadinya Western Intensification berdasarkan konsep vortisitas!", kunci_jawaban: "Terjadi akibat variasi parameter Coriolis (f) terhadap lintang. Untuk menjaga keseimbangan vortisitas gyre yang dihasilkan angin, arus di sisi barat harus sangat kuat dan sempit guna menghasilkan vortisitas gesekan (frictional vorticity) yang cukup besar untuk melawan vortisitas angin." },
+    { kategori: "Angin & Arus", tipe: "esai", pertanyaan: "Jelaskan apa yang dimaksud dengan Equatorial Under Current (EUC) dan mengapa arus ini mengalir ke Timur di bawah lapisan permukaan yang ditiup angin ke Barat!", kunci_jawaban: "EUC adalah arus bawah permukaan di ekuator. Angin pasat menumpuk massa air di Barat (slope muka air tinggi di Barat). Di bawah permukaan, pengaruh angin hilang namun gradien tekanan horizontal tetap ada, sehingga air mengalir menuruni slope ke arah Timur." },
+    { kategori: "Angin & Arus", tipe: "esai", pertanyaan: "Sebutkan perbedaan karakteristik fisis (kecepatan, lebar, kedalaman) antara WBC dan EBC!", kunci_jawaban: "WBC: Cepat (2-3 m/s), Sempit (~100 km), Dalam. EBC: Lambat (~0.25 m/s), Lebar (~1000 km), Dangkal." },
+    { kategori: "Angin & Arus", tipe: "true_false", pertanyaan: "Arus Peru (Humboldt) termasuk dalam kategori Eastern Boundary Current.", kunci_jawaban: "Benar" },
+    { kategori: "Angin & Arus", tipe: "true_false", pertanyaan: "Di khatulistiwa, gaya Coriolis bernilai maksimum.", kunci_jawaban: "Salah", penjelasan: "Coriolis bernilai nol di khatulistiwa (f = 2Ω sin 0 = 0)." },
+    { kategori: "Angin & Arus", tipe: "true_false", pertanyaan: "Gyre subtropis di Belahan Bumi Utara berputar searah jarum jam (Antisiklonik).", kunci_jawaban: "Benar" },
+
+    // 3. PERSAMAAN GELOMBANG PANJANG
+    { kategori: "Persamaan Gelpan", tipe: "pg", pertanyaan: "Dalam gelombang panjang, pendekatan asimtotik menyatakan bahwa kh bernilai...", pilihan: ["A. kh > π", "B. kh < 0.1π", "C. kh = π", "D. kh > 2π"], kunci_jawaban: "B. kh < 0.1π" },
+    { kategori: "Persamaan Gelpan", tipe: "pg", pertanyaan: "Kecepatan horizontal (u) pada gelombang panjang bersifat...", pilihan: ["A. Berubah drastis terhadap kedalaman", "B. Eksponensial", "C. Uniform/konstan terhadap kedalaman", "D. Nol di permukaan"], kunci_jawaban: "C. Uniform/konstan terhadap kedalaman" },
+    { kategori: "Persamaan Gelpan", tipe: "pg", pertanyaan: "Kecepatan vertikal (w) pada gelombang panjang bervariasi secara...", pilihan: ["A. Kuadratik", "B. Eksponensial", "C. Linear terhadap z", "D. Logaritmik"], kunci_jawaban: "C. Linear terhadap z" },
+    { kategori: "Persamaan Gelpan", tipe: "pg", pertanyaan: "Pada dasar perairan (z = -h), nilai kecepatan vertikal (w) adalah...", pilihan: ["A. Maksimum", "B. Setengah dari permukaan", "C. Nol", "D. Tak terhingga"], kunci_jawaban: "C. Nol" },
+    { kategori: "Persamaan Gelpan", tipe: "pg", pertanyaan: "Pendekatan asimtotik tanh(kh) untuk laut dangkal mendekati nilai...", pilihan: ["A. 1", "B. kh", "C. 0", "D. cosh(kh)"], kunci_jawaban: "B. kh" },
+    { kategori: "Persamaan Gelpan", tipe: "pg", pertanyaan: "Tekanan pada gelombang panjang dianggap bersifat...", pilihan: ["A. Dinamis murni", "B. Hidrostatik", "C. Atmosferik murni", "D. Tidak stabil"], kunci_jawaban: "B. Hidrostatik" },
+    { kategori: "Persamaan Gelpan", tipe: "pg", pertanyaan: "Tekanan hidrostatik pada gelombang panjang dirumuskan sebagai p = ...", pilihan: ["A. ρgz", "B. ρg(η - z)", "C. ρgη", "D. ρg(h + z)"], kunci_jawaban: "B. ρg(η - z)" },
+    { kategori: "Persamaan Gelpan", tipe: "pg", pertanyaan: "Rasio maksimum antara kecepatan horizontal (u) dan vertikal (w) adalah...", pilihan: ["A. kh", "B. 1 / kh", "C. √(gh) ", "D. η / h"], kunci_jawaban: "B. 1 / kh" },
+    { kategori: "Persamaan Gelpan", tipe: "pg", pertanyaan: "Aturan matematika yang digunakan untuk integrasi kontinuitas dari 3D ke 2D (integrasi kedalaman) adalah...", pilihan: ["A. Aturan Rantai", "B. Integrasi Leibniz", "C. Teorema Green", "D. Aturan Simpson"], kunci_jawaban: "B. Integrasi Leibniz" },
+    { kategori: "Persamaan Gelpan", tipe: "pg", pertanyaan: "Dalam persamaan momentum, suku (∂u/∂t) mewakili...", pilihan: ["A. Gaya gesek", "B. Percepatan lokal", "C. Gaya Coriolis", "D. Gradien tekanan"], kunci_jawaban: "B. Percepatan lokal" },
+    { kategori: "Persamaan Gelpan", tipe: "pg", pertanyaan: "Suku gradien tekanan dalam persamaan momentum arah-x gelombang panjang adalah...", pilihan: ["A. -g(∂η/∂x)", "B. -ρgη", "C. -g(∂h/∂x)", "D. -u(∂u/∂x)"], kunci_jawaban: "A. -g(∂η/∂x)" },
+    { kategori: "Persamaan Gelpan", tipe: "pg", pertanyaan: "Persamaan kontinuitas gelombang panjang dalam bentuk linear adalah...", pilihan: ["A. ∂η/∂t + h(∂u/∂x + ∂v/∂y) = 0", "B. ∂η/∂t + u(∂h/∂x) = 0", "C. ∂u/∂t + g(∂η/∂x) = 0", "D. ∂η/∂t = 0"], kunci_jawaban: "A. ∂η/∂t + h(∂u/∂x + ∂v/∂y) = 0" },
+    { kategori: "Persamaan Gelpan", tipe: "pg", pertanyaan: "Tujuan dilakukan linearisasi pada persamaan Navier-Stokes adalah...", pilihan: ["A. Menghilangkan gaya gravitasi", "B. Mengabaikan suku nonlinear (adveksi)", "C. Memasukkan efek gesekan", "D. Memperbesar nilai amplitudo"], kunci_jawaban: "B. Mengabaikan suku nonlinear (adveksi)" },
+    { kategori: "Persamaan Gelpan", tipe: "pg", pertanyaan: "Kecepatan rambat gelombang panjang Cs didefinisikan sebagai...", pilihan: ["A. √(g/h)", "B. √(gh)", "C. g/h", "D. gh"], kunci_jawaban: "B. √(gh)" },
+    { kategori: "Persamaan Gelpan", tipe: "pg", pertanyaan: "Persamaan gelombang satu dimensi untuk elevasi η adalah...", pilihan: ["A. ∂²η/∂t² = Cs² (∂²η/∂x²)", "B. ∂η/∂t = Cs (∂η/∂x)", "C. ∂²η/∂t² = g (∂η/∂x)", "D. ∂²η/∂x² = Cs² (∂²η/∂t²)"], kunci_jawaban: "A. ∂²η/∂t² = Cs² (∂²η/∂x²)" },
+    { kategori: "Persamaan Gelpan", tipe: "esai", pertanyaan: "Jelaskan mengapa dalam teori gelombang panjang, tekanan dapat dianggap bersifat hidrostatik!", kunci_jawaban: "Karena skala horizontal gelombang jauh lebih besar daripada skala vertikal (kedalaman), sehingga percepatan vertikal (Dw/Dt) sangat kecil dan dapat diabaikan dalam persamaan momentum vertikal, menyisakan keseimbangan antara gradien tekanan dan gravitasi." },
+    { kategori: "Persamaan Gelpan", tipe: "esai", pertanyaan: "Tuliskan langkah umum penurunan persamaan gelombang panjang dari persamaan kontinuitas 3D hingga menjadi persamaan kontinuitas terintegrasi kedalaman!", kunci_jawaban: "1. Tulis pers. kontinuitas 3D, 2. Integrasikan terhadap z dari dasar (-h) ke permukaan (eta) menggunakan aturan Leibniz, 3. Masukkan syarat batas kinematik di permukaan dan dasar, 4. Peroleh pers. dalam variabel eta dan kecepatan rata-rata." },
+    { kategori: "Persamaan Gelpan", tipe: "esai", pertanyaan: "Apa yang dimaksud dengan sifat non-dispersif pada gelombang perairan dangkal dan apa konsekuensi fisisnya?", kunci_jawaban: "Non-dispersif berarti kecepatan fase gelombang tidak tergantung pada panjang gelombang (L) atau frekuensi. Konsekuensinya, profil gelombang (misal tsunami) tidak akan berubah bentuk saat merambat selama kedalamannya konstan." },
+    { kategori: "Persamaan Gelpan", tipe: "true_false", pertanyaan: "Integrasi Leibniz melibatkan nilai variabel di batas atas (permukaan) dan batas bawah (dasar).", kunci_jawaban: "Benar" },
+    { kategori: "Persamaan Gelpan", tipe: "true_false", pertanyaan: "Dalam laut dangkal, cosh(kh) mendekati nilai 1.", kunci_jawaban: "Benar" },
+    { kategori: "Persamaan Gelpan", tipe: "true_false", pertanyaan: "Suku adveksi (u ∂u/∂x) dianggap sangat besar sehingga tidak boleh diabaikan dalam teori linear.", kunci_jawaban: "Salah", penjelasan: "Dalam teori linear, suku adveksi diabaikan karena nilainya kecil dibandingkan suku percepatan lokal." },
+    { kategori: "Persamaan Gelpan", tipe: "esai", pertanyaan: "Jelaskan apa arti fisis dari persamaan kontinuitas yang telah diintegrasi terhadap kedalaman!", kunci_jawaban: "Perubahan volume kolom air terhadap waktu (∂η/∂t) sebanding dengan konvergensi atau divergensi transportasi massa air horizontal dalam kolom tersebut." },
+
+    // 4. STORM SURGE
+    { kategori: "Storm Surge", tipe: "pg", pertanyaan: "Storm surge adalah kenaikan muka air laut yang disebabkan oleh...", pilihan: ["A. Gempa bumi", "B. Faktor meteorologis (angin dan tekanan)", "C. Gaya tarik bulan", "D. Pencairan es"], kunci_jawaban: "B. Faktor meteorologis (angin dan tekanan)" },
+    { kategori: "Storm Surge", tipe: "pg", pertanyaan: "Suhu minimal permukaan laut untuk pembentukan Badai Tropis (Tropical Storm) adalah...", pilihan: ["A. 20 C", "B. 24 C", "C. 26.5 C", "D. 30 C"], kunci_jawaban: "C. 26.5 C" },
+    { kategori: "Storm Surge", tipe: "pg", pertanyaan: "Pusat siklon tropis yang memiliki tekanan terendah dan angin paling tenang disebut...", pilihan: ["A. Eyewall", "B. Eye (Mata)", "C. Rain bands", "D. Cirrus Shield"], kunci_jawaban: "B. Eye (Mata)" },
+    { kategori: "Storm Surge", tipe: "pg", pertanyaan: "Arah rotasi badai tropis di Belahan Bumi Utara adalah...", pilihan: ["A. Searah jarum jam", "B. Berlawanan arah jarum jam", "C. Tidak berputar", "D. Menuju ekuator"], kunci_jawaban: "B. Berlawanan arah jarum jam" },
+    { kategori: "Storm Surge", tipe: "pg", pertanyaan: "Skala yang digunakan untuk mengukur intensitas Hurricane adalah...", pilihan: ["A. Skala Richter", "B. Skala Beaufort", "C. Skala Saffir-Simpson", "D. Skala Fujita"], kunci_jawaban: "C. Skala Saffir-Simpson" },
+    { kategori: "Storm Surge", tipe: "pg", pertanyaan: "Kategori 5 pada skala Saffir-Simpson memiliki kecepatan angin...", pilihan: ["A. 119 - 153 km/jam", "B. 154 - 177 km/jam", "C. 178 - 208 km/jam", "D. > 252 km/jam"], kunci_jawaban: "D. > 252 km/jam" },
+    { kategori: "Storm Surge", tipe: "pg", pertanyaan: "Fenomena 'Inverted Barometer Effect' menyatakan bahwa tiap penurunan tekanan 1 mbar akan menaikkan air sebesar...", pilihan: ["A. 1 mm", "B. 1 cm", "C. 10 cm", "D. 1 m"], kunci_jawaban: "B. 1 cm" },
+    { kategori: "Storm Surge", tipe: "pg", pertanyaan: "Gabungan antara Storm Surge dan Pasang Surut astronomis disebut...", pilihan: ["A. Tsunami", "B. Storm Tide", "C. Wave Run-up", "D. Seiches"], kunci_jawaban: "B. Storm Tide" },
+    { kategori: "Storm Surge", tipe: "pg", pertanyaan: "Elevasi residu (surge) dihitung dengan rumus...", pilihan: ["A. Elevasi Total + Pasut", "B. Elevasi Total - Pasut", "C. Elevasi Total / Pasut", "D. Pasut - Elevasi Total"], kunci_jawaban: "B. Elevasi Total - Pasut" },
+    { kategori: "Storm Surge", tipe: "pg", pertanyaan: "Di kanal tertutup, stress angin menyebabkan penumpukan air di ujung kanal yang disebut...", pilihan: ["A. Wind Set-up", "B. Wind Set-down", "C. Coriolis Deflection", "D. Sinking"], kunci_jawaban: "A. Wind Set-up" },
+    { kategori: "Storm Surge", tipe: "pg", pertanyaan: "Kemiringan muka air (∂η/∂x) akibat angin berbanding terbalik dengan...", pilihan: ["A. Kecepatan angin", "B. Kedalaman (h)", "C. Densitas air", "D. Gravitasi"], kunci_jawaban: "B. Kedalaman (h)" },
+    { kategori: "Storm Surge", tipe: "pg", pertanyaan: "Komponen gaya dalam storm surge yang dipengaruhi oleh rotasi bumi adalah...", pilihan: ["A. Gaya Gravitasi", "B. Gaya Coriolis", "C. Gaya Barometrik", "D. Stress Angin"], kunci_jawaban: "B. Gaya Coriolis" },
+    { kategori: "Storm Surge", tipe: "pg", pertanyaan: "Mengapa storm surge lebih berbahaya di perairan dangkal?", pilihan: ["A. Karena angin lebih kuat", "B. Karena kemiringan muka air akibat angin (slope) lebih besar", "C. Karena tekanan udara lebih rendah", "D. Karena gravitasi lebih besar"], kunci_jawaban: "B. Karena kemiringan muka air akibat angin (slope) lebih besar" },
+    { kategori: "Storm Surge", tipe: "pg", pertanyaan: "Dalam kondisi 'Steady State' di kanal tertutup, transportasi massa bersih adalah...", pilihan: ["A. Maksimum ke depan", "B. Nol", "C. Maksimum ke belakang", "D. Tergantung panjang kanal"], kunci_jawaban: "B. Nol" },
+    { kategori: "Storm Surge", tipe: "pg", pertanyaan: "Suku (1/ρ * ∂Pa/∂x) dalam persamaan momentum storm surge mewakili gaya...", pilihan: ["A. Angin", "B. Tekanan atmosfer", "C. Gesek dasar", "D. Gravitasi"], kunci_jawaban: "B. Tekanan atmosfer" },
+    { kategori: "Storm Surge", tipe: "esai", pertanyaan: "Jelaskan konsep 'Inverted Barometer Effect' dan berikan contoh perhitungannya jika tekanan turun sebesar 30 mbar!", kunci_jawaban: "Konsep ini menyatakan bahwa penurunan tekanan atmosfer sebesar 1 mbar akan menyebabkan kenaikan muka air sebesar 1 cm (efek statis). Jika tekanan turun 30 mbar, maka kenaikan muka air statis adalah 30 cm." },
+    { kategori: "Storm Surge", tipe: "esai", pertanyaan: "Sebutkan 3 komponen utama struktur fisis sebuah Hurricane dan jelaskan karakteristik cuaca di masing-masing komponen tersebut!", kunci_jawaban: "1. Eye (Pusat, tenang, tekanan terendah), 2. Eyewall (Sekeliling mata, angin terkuat, hujan paling deras), 3. Rain bands (Pita luar, hujan intermiten, awan kumulonimbus)." },
+    { kategori: "Storm Surge", tipe: "esai", pertanyaan: "Mengapa konfigurasi pantai (seperti teluk atau kanal tertutup) dapat memperparah dampak Storm Surge?", kunci_jawaban: "Karena massa air yang didorong oleh stress angin ke arah pantai akan tertahan oleh batas daratan (konvergensi), sehingga terjadi penumpukan air (wind set-up) yang jauh lebih tinggi dibandingkan di laut terbuka." },
+    { kategori: "Storm Surge", tipe: "true_false", pertanyaan: "Hurricane kategori 1 menyebabkan kerusakan yang bersifat Catastrophic.", kunci_jawaban: "Salah", penjelasan: "Kategori 1 kerusakannya minimal, Kategori 5 yang Catastrophic." },
+    { kategori: "Storm Surge", tipe: "true_false", pertanyaan: "Stress angin di permukaan (τsx) berbanding lurus dengan kuadrat kecepatan angin (W²).", kunci_jawaban: "Benar" },
+    { kategori: "Storm Surge", tipe: "true_false", pertanyaan: "Storm surge tidak dipengaruhi oleh bentuk garis pantai.", kunci_jawaban: "Salah", penjelasan: "Konfigurasi pantai (seperti teluk) sangat mempengaruhi amplifikasi storm surge." },
+    { kategori: "Storm Surge", tipe: "esai", pertanyaan: "Sebutkan 3 faktor utama yang menyebabkan kenaikan muka air saat terjadi badai tropis!", kunci_jawaban: "1. Efek tekanan atmosfer (Inverted Barometer), 2. Stress angin (Wind Set-up), 3. Efek Coriolis/Konfigurasi pantai." },
+
+    // 5. INTERNAL WAVE
+    { kategori: "Internal Wave", tipe: "pg", pertanyaan: "Gelombang internal merambat pada lapisan interface yang memisahkan...", pilihan: ["A. Air dan Udara", "B. Dua lapisan fluida dengan densitas berbeda", "C. Air laut dan Dasar laut", "D. Air tawar dan Es"], kunci_jawaban: "B. Dua lapisan fluida dengan densitas berbeda" },
+    { kategori: "Internal Wave", tipe: "pg", pertanyaan: "Gaya pemulih utama pada gelombang internal adalah...", pilihan: ["A. Tegangan permukaan", "B. Reduced Gravity (g')", "C. Tekanan Atmosfer", "D. Gaya Coriolis"], kunci_jawaban: "B. Reduced Gravity (g')" },
+    { kategori: "Internal Wave", tipe: "pg", pertanyaan: "Manifestasi gelombang internal di permukaan laut sering terlihat sebagai pola...", pilihan: ["A. Whitecaps", "B. Rough and Smooth Slicks (berselang-seling)", "C. Tsunami", "D. Pusaran air"], kunci_jawaban: "B. Rough and Smooth Slicks (berselang-seling)" },
+    { kategori: "Internal Wave", tipe: "pg", pertanyaan: "Amplitudo gelombang internal jika dibandingkan dengan gelombang permukaan umumnya...", pilihan: ["A. Jauh lebih kecil", "B. Sama besar", "C. Jauh lebih besar (bisa puluhan meter)", "D. Selalu nol"], kunci_jawaban: "C. Jauh lebih besar (bisa puluhan meter)" },
+    { kategori: "Internal Wave", tipe: "pg", pertanyaan: "Kecepatan rambat gelombang internal dibandingkan gelombang permukaan adalah...", pilihan: ["A. Lebih cepat", "B. Lebih lambat", "C. Sama", "D. Sangat cepat"], kunci_jawaban: "B. Lebih lambat" },
+    { kategori: "Internal Wave", tipe: "pg", pertanyaan: "Fenomena 'Dead Water' terjadi karena propeler kapal membangkitkan...", pilihan: ["A. Gelombang permukaan besar", "B. Gelombang internal pada interface air tawar dan asin", "C. Arus turbulen dasar", "D. Kavitasi"], kunci_jawaban: "B. Gelombang internal pada interface air tawar dan asin" },
+    { kategori: "Internal Wave", tipe: "pg", pertanyaan: "Kolom air dikatakan STABIL jika nilai gradien densitas vertikal (dρ/dz) bernilai...", pilihan: ["A. Positif (> 0)", "B. Negatif (< 0)", "C. Nol", "D. Tak terhingga"], kunci_jawaban: "B. Negatif (< 0)" },
+    { kategori: "Internal Wave", tipe: "pg", pertanyaan: "Jika dρ/dz < 0, maka parsel air yang dipindahkan ke atas akan...", pilihan: ["A. Terus naik", "B. Kembali ke posisi semula (berosilasi)", "C. Berhenti", "D. Menyamping"], kunci_jawaban: "B. Kembali ke posisi semula (berosilasi)" },
+    { kategori: "Internal Wave", tipe: "pg", pertanyaan: "Frekuensi osilasi parsel air dalam kondisi stabil disebut frekuensi...", pilihan: ["A. Coriolis", "B. Brunt-Väisälä (N)", "C. Ekman", "D. Tidal"], kunci_jawaban: "B. Brunt-Väisälä (N)" },
+    { kategori: "Internal Wave", tipe: "pg", pertanyaan: "Nilai frekuensi N(z) mencapai maksimum pada daerah...", pilihan: ["A. Permukaan tercampur", "B. Piknoklin/Termoklin", "C. Dasar laut", "D. Ekuator"], kunci_jawaban: "B. Piknoklin/Termoklin" },
+    { kategori: "Internal Wave", tipe: "pg", pertanyaan: "Internal wave periode pendek biasanya memiliki rentang periode...", pilihan: ["A. < 1 detik", "B. 5 - 20 menit", "C. 12 - 24 jam", "D. > 1 bulan"], kunci_jawaban: "B. 5 - 20 menit" },
+    { kategori: "Internal Wave", tipe: "pg", pertanyaan: "Mekanisme utama pembangkit internal wave di Selat Lombok adalah...", pilihan: ["A. Angin badai", "B. Interaksi arus pasut dengan ambang (sill)", "C. Gempa bumi", "D. Kapal lewat"], kunci_jawaban: "B. Interaksi arus pasut dengan ambang (sill)" },
+    { kategori: "Internal Wave", tipe: "pg", pertanyaan: "Untuk mensimulasikan penjalaran (propagation) internal wave, model yang digunakan harus bersifat...", pilihan: ["A. Hidrostatik", "B. Non-hidrostatik", "C. Linear murni", "D. Tanpa densitas"], kunci_jawaban: "B. Non-hidrostatik" },
+    { kategori: "Internal Wave", tipe: "pg", pertanyaan: "Internal wave penting dalam oseanografi karena membantu proses...", pilihan: ["A. Pembentukan es", "B. Vertical mixing (pencampuran nutrien)", "C. Penurunan muka air global", "D. Pasang surut"], kunci_jawaban: "B. Vertical mixing (pencampuran nutrien)" },
+    { kategori: "Internal Wave", tipe: "pg", pertanyaan: "Alat atau data yang bisa mendeteksi internal wave dari luar angkasa adalah...", pilihan: ["A. Termometer", "B. Citra Satelit SAR (Synthetic Aperture Radar)", "C. GPS", "D. Anemometer"], kunci_jawaban: "B. Citra Satelit SAR (Synthetic Aperture Radar)" },
+    { kategori: "Internal Wave", tipe: "esai", pertanyaan: "Jelaskan mekanisme terjadinya osilasi pada parsel air di kolom air yang STABIL!", kunci_jawaban: "Jika parsel air di z1 dipindah ke z2 (lebih dangkal), parsel tersebut akan lebih berat daripada lingkungannya. Gaya berat > gaya apung, sehingga parsel ditarik kembali ke z1. Akibat momentum, ia melewati z1 ke bawah, menjadi lebih ringan, lalu didorong ke atas lagi. Terjadilah osilasi." },
+    { kategori: "Internal Wave", tipe: "esai", pertanyaan: "Apa peranan penting gelombang internal bagi produktivitas hayati di laut dalam?", kunci_jawaban: "Gelombang internal yang pecah (breaking internal waves) menyebabkan turbulensi dan vertical mixing. Proses ini membawa nutrien dari lapisan dalam samudera ke zona eufotik di permukaan yang mendukung pertumbuhan fitoplankton." },
+    { kategori: "Internal Wave", tipe: "esai", pertanyaan: "Sebutkan 3 perbedaan utama antara Gelombang Internal dan Gelombang Permukaan!", kunci_jawaban: "1. Gaya pemulih (IW: reduced gravity, SW: gravity), 2. Kecepatan (IW jauh lebih lambat), 3. Amplitudo (IW jauh lebih besar, bisa ratusan meter di dalam kolom air)." },
+    { kategori: "Internal Wave", tipe: "true_false", pertanyaan: "Gelombang internal hanya bisa terjadi jika densitas air laut seragam dari atas ke bawah.", kunci_jawaban: "Salah", penjelasan: "Syarat utama internal wave adalah adanya stratifikasi densitas." },
+    { kategori: "Internal Wave", tipe: "true_false", pertanyaan: "Amplitudo gelombang internal di Selat Lombok bisa mencapai puluhan hingga ratusan meter.", kunci_jawaban: "Benar" },
+    { kategori: "Internal Wave", tipe: "true_false", pertanyaan: "Pada kondisi tidak stabil (dρ/dz > 0), parsel air yang dipindahkan akan kembali ke posisi semula.", kunci_jawaban: "Salah", penjelasan: "Pada kondisi tidak stabil, parsel akan terus bergerak menjauhi posisi semula (konveksi)." },
+    { kategori: "Internal Wave", tipe: "esai", pertanyaan: "Tuliskan rumus frekuensi Brunt-Väisälä N(z) dan jelaskan variabelnya!", kunci_jawaban: "N(z) = [(-g/ρ) * (dρ/dz)]^1/2. g = gravitasi, ρ = densitas, dρ/dz = gradien densitas vertikal." },
+
+    // 6. KELVIN WAVE
+    { kategori: "Kelvin Wave", tipe: "pg", pertanyaan: "Gelombang Kelvin adalah jenis gelombang panjang yang penjalarannya membutuhkan...", pilihan: ["A. Kedalaman sangat dalam", "B. Batas (boundary) seperti pantai atau ekuator", "C. Angin kencang", "D. Dasar laut yang rata"], kunci_jawaban: "B. Batas (boundary) seperti pantai atau ekuator" },
+    { kategori: "Kelvin Wave", tipe: "pg", pertanyaan: "Keseimbangan gaya utama pada gelombang Kelvin adalah antara...", pilihan: ["A. Gravitasi dan Gesekan", "B. Gaya Coriolis dan Gaya Gradien Tekanan horizontal", "C. Angin dan Tekanan", "D. Pasut dan Arus"], kunci_jawaban: "B. Gaya Coriolis dan Gaya Gradien Tekanan horizontal" },
+    { kategori: "Kelvin Wave", tipe: "pg", pertanyaan: "Coastal Kelvin Wave di Belahan Bumi Utara menjalar dengan posisi pantai di sebelah...", pilihan: ["A. Kiri arah penjalaran", "B. Kanan arah penjalaran", "C. Depan", "D. Belakang"], kunci_jawaban: "B. Kanan arah penjalaran" },
+    { kategori: "Kelvin Wave", tipe: "pg", pertanyaan: "Coastal Kelvin Wave di Belahan Bumi Selatan menjalar dengan arah...", pilihan: ["A. Searah jarum jam (Clockwise) mengelilingi basin", "B. Berlawanan jarum jam (Anti-clockwise)", "C. Menuju ekuator saja", "D. Ke arah Barat saja"], kunci_jawaban: "A. Searah jarum jam (Clockwise) mengelilingi basin" },
+    { kategori: "Kelvin Wave", tipe: "pg", pertanyaan: "Amplitudo gelombang Kelvin maksimum berada di...", pilihan: ["A. Tengah laut", "B. Tepat di garis pantai (boundary)", "C. Dasar laut", "D. Ekuator saja"], kunci_jawaban: "B. Tepat di garis pantai (boundary)" },
+    { kategori: "Kelvin Wave", tipe: "pg", pertanyaan: "Amplitudo gelombang Kelvin meluruh secara eksponensial ke arah lepas pantai (offshore). Jarak peluruhannya disebut...", pilihan: ["A. Panjang gelombang", "B. Rossby Radius of Deformation (L)", "C. Kedalaman Ekman", "D. Fetch"], kunci_jawaban: "B. Rossby Radius of Deformation (L)" },
+    { kategori: "Kelvin Wave", tipe: "pg", pertanyaan: "Rumus Rossby Radius of Deformation adalah...", pilihan: ["A. L = c * f", "B. L = c / f", "C. L = f / c", "D. L = √(gh)"], kunci_jawaban: "B. L = c / f" },
+    { kategori: "Kelvin Wave", tipe: "pg", pertanyaan: "Bagaimanakah nilai Rossby Radius (L) di daerah ekuator?", pilihan: ["A. Sangat kecil", "B. Bernilai nol", "C. Sangat besar/tak berhingga (f mendekati nol)", "D. Sama dengan kutub"], kunci_jawaban: "C. Sangat besar/tak berhingga (f mendekati nol)" },
+    { kategori: "Kelvin Wave", tipe: "pg", pertanyaan: "Equatorial Kelvin Wave hanya dapat menjalar ke arah...", pilihan: ["A. Barat", "B. Timur", "C. Utara", "D. Selatan"], kunci_jawaban: "B. Timur" },
+    { kategori: "Kelvin Wave", tipe: "pg", pertanyaan: "Kecepatan fase (c) gelombang Kelvin baroklinik (internal) tipikal adalah...", pilihan: ["A. 200 m/s", "B. 0.5 - 3 m/s", "C. 50 m/s", "D. 1500 m/s"], kunci_jawaban: "B. 0.5 - 3 m/s" },
+    { kategori: "Kelvin Wave", tipe: "pg", pertanyaan: "Pemicu utama Equatorial Kelvin Wave di Samudera Pasifik (terkait ENSO) adalah...", pilihan: ["A. Gempa bumi", "B. Variasi angin pasat (Westerly Wind Bursts)", "C. Pasang surut", "D. Arus Kuroshio"], kunci_jawaban: "B. Variasi angin pasat (Westerly Wind Bursts)" },
+    { kategori: "Kelvin Wave", tipe: "pg", pertanyaan: "Internal Kelvin Wave dapat menyebabkan 'seasonal upwelling' di wilayah...", pilihan: ["A. Pantai California", "B. Teluk Guinea (Pantai Ghana)", "C. Laut Jawa", "D. Laut Jepang"], kunci_jawaban: "B. Teluk Guinea (Pantai Ghana)" },
+    { kategori: "Kelvin Wave", tipe: "pg", pertanyaan: "Sifat penjalaran gelombang Kelvin adalah...", pilihan: ["A. Dispersif", "B. Non-dispersif (menjalar tanpa perubahan bentuk)", "C. Tidak stabil", "D. Hanya vertikal"], kunci_jawaban: "B. Non-dispersif (menjalar tanpa perubahan bentuk)" },
+    { kategori: "Kelvin Wave", tipe: "pg", pertanyaan: "Di khatulistiwa, Equatorial Kelvin Wave terjebak karena...", pilihan: ["A. Tekanan udara tinggi", "B. Gaya Coriolis berubah tanda (f=0)", "C. Kedalaman laut sangat dangkal", "D. Efek gravitasi bulan"], kunci_jawaban: "B. Gaya Coriolis berubah tanda (f=0)" },
+    { kategori: "Kelvin Wave", tipe: "pg", pertanyaan: "Kecepatan gelombang Kelvin barotropik (permukaan) dirumuskan dengan...", pilihan: ["A. √(g'h)", "B. √(gh)", "C. g/f", "D. c/L"], kunci_jawaban: "B. √(gh)" },
+    { kategori: "Kelvin Wave", tipe: "esai", pertanyaan: "Jelaskan mengapa Coastal Kelvin Wave di Belahan Bumi Utara menjalar searah berlawanan jarum jam (counter-clockwise) mengelilingi sebuah basin!", kunci_jawaban: "Karena gaya Coriolis di BBU membelokkan arus ke kanan. Saat gelombang menjalar menyusuri pantai, pantai harus berada di sisi kanan penjalaran agar terjadi keseimbangan geostropik. Konfigurasi ini secara otomatis membentuk lintasan counter-clockwise." },
+    { kategori: "Kelvin Wave", tipe: "esai", pertanyaan: "Apa yang dimaksud dengan Jari-jari Deformasi Rossby (Rossby Radius) dan jelaskan variabel yang mempengaruhinya!", kunci_jawaban: "L = c/f. Merupakan skala jarak horizontal di mana efek rotasi bumi (Coriolis) menjadi setara dengan efek gravitasi. Dipengaruhi oleh kecepatan fase gelombang (c) dan parameter Coriolis (f) yang nilainya berubah terhadap lintang." },
+    { kategori: "Kelvin Wave", tipe: "esai", pertanyaan: "Jelaskan peran Equatorial Kelvin Wave dalam fenomena El Niño di Samudera Pasifik!", kunci_jawaban: "Adanya Westerly Wind Burst di Pasifik Barat memicu gelombang Kelvin internal yang menjalar ke Timur. Gelombang ini menurunkan kedalaman termoklin di Pasifik Timur, menghambat upwelling air dingin, dan menyebabkan suhu permukaan laut di Timur memanas (El Niño)." },
+    { kategori: "Kelvin Wave", tipe: "true_false", pertanyaan: "Coastal Kelvin Wave di Belahan Bumi Selatan menjalar dengan pantai di sebelah kanan.", kunci_jawaban: "Salah", penjelasan: "Di BBS pantai berada di sebelah KIRI arah penjalaran." },
+    { kategori: "Kelvin Wave", tipe: "true_false", pertanyaan: "Rossby Radius (L) berkurang nilainya jika lintang bertambah (menuju kutub).", kunci_jawaban: "Benar" },
+    { kategori: "Kelvin Wave", tipe: "true_false", pertanyaan: "Gelombang Kelvin tidak memiliki komponen kecepatan yang tegak lurus pantai (v = 0).", kunci_jawaban: "Benar" },
+    { kategori: "Kelvin Wave", tipe: "esai", pertanyaan: "Jelaskan mengapa gelombang Kelvin disebut sebagai gelombang yang terjebak (trapped wave)!", kunci_jawaban: "Karena amplitudonya meluruh secara eksponensial menjauhi boundary (pantai atau ekuator), sehingga energinya terkonsentrasi hanya di dekat batas tersebut." }
+];
+
+let soalAktif = [], indeksSoal = 0, jawabanUser = [];
+
+function initMenu() {
+    const container = document.getElementById('menu-container');
+    container.innerHTML = ''; 
+    const kategoriUnik = [...new Set(databaseSoal.map(s => s.kategori))];
+    kategoriUnik.forEach(k => {
+        const btn = document.createElement('button');
+        btn.className = 'btn-outline';
+        btn.innerText = k;
+        btn.onclick = () => startQuiz(k);
+        container.appendChild(btn);
+    });
+    document.getElementById('btn-all-topics').innerText = `Mulai Semua Topik (${databaseSoal.length} Soal)`;
+}
+
+function startQuiz(k) {
+    soalAktif = k === 'Semua Topik' ? [...databaseSoal] : databaseSoal.filter(s => s.kategori === k);
+    indeksSoal = 0; 
+    jawabanUser = new Array(soalAktif.length).fill(""); 
+    document.getElementById('home-screen').style.display = 'none';
+    document.getElementById('result-screen').style.display = 'none'; 
+    document.getElementById('quiz-screen').style.display = 'block';
+    document.getElementById('current-category-text').innerText = k;
+    renderSoal();
+}
+
+function renderSoal() {
+    const s = soalAktif[indeksSoal];
+    document.getElementById('question-counter').innerText = `Soal ${indeksSoal + 1} / ${soalAktif.length}`;
+    document.getElementById('progress-bar').style.width = `${((indeksSoal + 1) / soalAktif.length) * 100}%`;
+    document.getElementById('question-text').innerText = s.pertanyaan;
+    
+    const container = document.getElementById('answer-container');
+    container.innerHTML = '';
+
+    if (s.tipe === 'esai') {
+        const txt = document.createElement('textarea');
+        txt.className = 'essay-input';
+        txt.placeholder = "Ketik jawaban analisis Anda...";
+        txt.value = jawabanUser[indeksSoal];
+        txt.oninput = (e) => { jawabanUser[indeksSoal] = e.target.value; };
+        container.appendChild(txt);
+    } else {
+        const div = document.createElement('div'); div.className = 'options-list';
+        const pilihanTampil = s.tipe === 'true_false' ? ["Benar", "Salah"] : s.pilihan;
+        
+        pilihanTampil.forEach(o => {
+            const lbl = document.createElement('label'); 
+            lbl.className = 'option-item' + (jawabanUser[indeksSoal] === o ? ' selected' : '');
+            lbl.innerHTML = `<input type="radio" name="opt" ${jawabanUser[indeksSoal] === o ? 'checked' : ''}> ${o}`;
+            lbl.onclick = () => {
+                jawabanUser[indeksSoal] = o;
+                renderSoal(); 
+            };
+            div.appendChild(lbl);
+        });
+        container.appendChild(div);
+    }
+
+    document.getElementById('btn-prev').style.display = indeksSoal === 0 ? 'none' : 'block';
+    document.getElementById('btn-next').style.display = indeksSoal === soalAktif.length - 1 ? 'none' : 'block';
+    document.getElementById('btn-lihat-hasil').style.display = 'block'; 
+
+    window.scrollTo(0, 0);
+}
+
+function nextQuestion() { if (indeksSoal < soalAktif.length - 1) { indeksSoal++; renderSoal(); } }
+function prevQuestion() { if (indeksSoal > 0) { indeksSoal--; renderSoal(); } }
+
+function showResults() {
+    const belum = jawabanUser.filter(j => j === "").length;
+    if (belum > 0) {
+        if (!confirm(`Masih ada ${belum} soal belum diisi. Tetap lihat hasil?`)) return;
+    }
+
+    document.getElementById('quiz-screen').style.display = 'none';
+    document.getElementById('result-screen').style.display = 'block';
+    
+    let skor = 0;
+    const rev = document.getElementById('review-container'); rev.innerHTML = '';
+    
+    soalAktif.forEach((s, i) => {
+        const u = jawabanUser[i];
+        const displayUser = u === "" ? "<span style='color:orange'>(Belum dikerjakan)</span>" : u;
+        const card = document.createElement('div'); card.className = 'review-card';
+        
+        let isWrong = (s.tipe === 'pg' || s.tipe === 'true_false') && u !== s.kunci_jawaban;
+        if (isWrong) card.classList.add('wrong-pg');
+        if ((s.tipe === 'pg' || s.tipe === 'true_false') && u === s.kunci_jawaban) skor++;
+
+        const penjelasanText = s.penjelasan ? `<br><small><i>Ket: ${s.penjelasan}</i></small>` : "";
+
+        card.innerHTML = `
+            <div class="review-q">
+                <span style="font-weight:bold">${i+1}. ${s.pertanyaan}</span>
+                <span class="review-badge">${s.tipe.replace('_','/').toUpperCase()}</span>
+            </div>
+            <div style="font-size:12px; color:#666; margin-top:10px;">Jawaban Anda:</div>
+            <div class="ans-user">${displayUser} ${isWrong && u !== "" ? '<span style="color:red; font-weight:bold"> (Salah)</span>' : ''}</div>
+            <div style="font-size:12px; color:#666; margin-top:10px">Jawaban Benar:</div>
+            <div class="ans-ref">${s.kunci_jawaban}${penjelasanText}</div>
+        `;
+        rev.appendChild(card);
+    });
+    
+    document.getElementById('score-category-name').innerText = document.getElementById('current-category-text').innerText;
+    document.getElementById('score-text-total').innerText = `${skor} / ${soalAktif.filter(x=>x.tipe !== 'esai').length}`;
+    window.scrollTo(0,0);
+}
+
+initMenu();
+</script>
+</body>
+</html>
